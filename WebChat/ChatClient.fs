@@ -18,8 +18,10 @@ module ChatClient =
         let msgElm = renderMessage msg
         ById("chat-box").AppendChild(msgElm.Dom) |> ignore
 
-    let sendMessage (ws:WebSocket) (msgBox : Element) =
-        ws.Send(Speak msgBox.Value |> Json.Stringify)
+    let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
+
+    let sendMessage (msgBox : Element) =
+        currentWebSocket.Send(Speak msgBox.Value |> Json.Stringify)
         appendMessage msgBox.Value
         msgBox.Value <- ""
 
@@ -34,15 +36,23 @@ module ChatClient =
         ws.Onclose <- fun () ->
             JQuery.Of("#message-box").Attr("disabled", "disabled") |> ignore
             appendNotification "disconnect"
+            JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
         ws
-       
-    let renderMain =
+
+    let connect () =
         let ws = openChatWebSocket ()
+        JQuery.Of("#reconnect-button").Attr("disabled", "disabled") |> ignore
+        currentWebSocket <- ws
+
+    let renderMain =
+        connect ()
         let msgBox = Input [ Text ""; Attr.Id "message-box"; Attr.Disabled "disabled"; Attr.Type "text" ] 
         Div [
             Div [ Attr.Id "chat-box" ]
+            Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]
+            |>! OnClick (fun x ev -> connect ())
             msgBox
-            |>! OnKeyPress (fun input char -> if char.CharacterCode = 13 then sendMessage ws msgBox)
+            |>! OnKeyPress (fun input char -> if char.CharacterCode = 13 then sendMessage msgBox)
         ]
 
 type ChatControl () =
