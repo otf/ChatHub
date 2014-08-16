@@ -27,15 +27,18 @@ module ChatClient =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
         ws.Onmessage <- fun ev -> 
             match Json.Parse(ev.Data.ToString()) |> As<ServerProtocol> with
-            | ServerProtocol.Join -> appendNotification "connect"
+            | ServerProtocol.Join -> 
+                appendNotification "connect"
+                JQuery.Of("#message-box").RemoveAttr("disabled") |> ignore
             | ServerProtocol.Listen msg -> appendMessage msg
         ws.Onclose <- fun () ->
+            JQuery.Of("#message-box").Attr("disabled", "disabled") |> ignore
             appendNotification "disconnect"
         ws
        
     let renderMain =
         let ws = openChatWebSocket ()
-        let msgBox = Input [ Text ""; Attr.Id "message-box"; Attr.Type "text" ] 
+        let msgBox = Input [ Text ""; Attr.Id "message-box"; Attr.Disabled "disabled"; Attr.Type "text" ] 
         Div [
             Div [ Attr.Id "chat-box" ]
             msgBox
