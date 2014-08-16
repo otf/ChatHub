@@ -1,33 +1,10 @@
 namespace WebChat
 
-open IntelliFactory.WebSharper
-
 open System.Web
-open System.Net.WebSockets
 open Microsoft.Web.WebSockets
 open System.Collections.Concurrent
 
-[<JavaScript>]
-type ClientProtocol = 
-    | Speak of string
-
-[<JavaScript>]
-type ServerProtocol = 
-    | Join
-    | Listen of string
-
-module Protocol =
-  let decodeClientProtocol (json : string) =
-      let jP = Core.Json.Provider.Create()
-      let dec = jP.GetDecoder<ClientProtocol>()
-      dec.Decode (Core.Json.Parse json)
-
-  let encodeServerProtocol (x : ServerProtocol) =
-      let jP = Core.Json.Provider.Create()
-      let enc = jP.GetEncoder<ServerProtocol>()
-      enc.Encode x
-      |> jP.Pack
-      |> Core.Json.Stringify
+open Protocol
 
 type Client<'a> = 
     | Waiting
@@ -43,8 +20,8 @@ type WebSocketChatHandler () =
         | Some kvp -> 
             if handlers.TryUpdate(kvp.Key, Chatting(this), Waiting) then
                 handlers.TryAdd(this, Chatting(kvp.Key)) |> ignore
-                kvp.Key.Send(Protocol.encodeServerProtocol Join)
-                this.Send(Protocol.encodeServerProtocol Join)
+                kvp.Key.Send(encodeServerProtocol Join)
+                this.Send(encodeServerProtocol Join)
             else
                 handlers.TryAdd(this, Waiting) |> ignore
         | None -> handlers.TryAdd(this, Waiting) |> ignore
@@ -58,11 +35,11 @@ type WebSocketChatHandler () =
 
     member private this.onSpeak (msg) =
         match handlers.TryGetValue(this) with
-        | (true, Chatting target) -> target.Send(Protocol.encodeServerProtocol (Listen msg))
+        | (true, Chatting target) -> target.Send(encodeServerProtocol (Listen msg))
         | _ -> ()
 
     override this.OnMessage (message : string) = 
-        match message |> Protocol.decodeClientProtocol with
+        match message |> decodeClientProtocol with
         | Speak msg -> this.onSpeak(msg)
 
 type ChatWebSocket() = 

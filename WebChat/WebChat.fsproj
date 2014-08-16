@@ -112,6 +112,7 @@
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
+    <Compile Include="Protocol.fs" />
     <Compile Include="ChatWebSocket.fs" />
     <Compile Include="ChatClient.fs" />
     <Compile Include="Main.fs" />

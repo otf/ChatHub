@@ -5,6 +5,8 @@ open IntelliFactory.WebSharper.Html
 open IntelliFactory.WebSharper.Html5
 open IntelliFactory.WebSharper.JQuery
 
+open Protocol
+
 [<JavaScript>]
 module ChatClient =
     let renderMessage (msg : string) =
@@ -50,7 +52,7 @@ module ChatClient =
         Div [
             Div [ Attr.Id "chat-box" ]
             Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]
-            |>! OnClick (fun x ev -> connect ())
+            |>! OnClick (fun x ev -> connect (); appendNotification "waiting...")
             msgBox
             |>! OnKeyPress (fun input char -> if char.CharacterCode = 13 then sendMessage msgBox)
         ]
