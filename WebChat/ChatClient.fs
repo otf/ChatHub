@@ -2,6 +2,7 @@ namespace WebChat
 
 open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.Html
+open IntelliFactory.WebSharper.Html5
 open IntelliFactory.WebSharper.JQuery
 
 [<JavaScript>]
@@ -9,17 +10,27 @@ module ChatClient =
     let renderMessage (msg : string) =
         Div [Text msg]
 
-    let sendMessage (msgBox : Element) =
-        let msgElm = renderMessage msgBox.Value
+    let appendMessage (msg : string) =
+        let msgElm = renderMessage msg
         ById("chat-box").AppendChild(msgElm.Dom) |> ignore
+
+    let sendMessage (ws:WebSocket) (msgBox : Element) =
+        ws.Send(msgBox.Value)
+        appendMessage msgBox.Value
         msgBox.Value <- ""
+
+    let openChatWebSocket () =
+        let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
+        ws.Onmessage <- fun data -> data.Data.ToString() |> appendMessage
+        ws
        
     let renderMain =
+        let ws = openChatWebSocket ()
         let msgBox = Input [ Text ""; Attr.Id "message-box"; Attr.Type "text" ] 
         Div [
             Div [ Attr.Id "chat-box" ]
             msgBox
-            |>! OnKeyPress (fun input char -> if char.CharacterCode = 13 then sendMessage msgBox)
+            |>! OnKeyPress (fun input char -> if char.CharacterCode = 13 then sendMessage ws msgBox)
         ]
 
 type ChatControl () =
