@@ -8,16 +8,6 @@ type Action =
     | Home
     | Chat
 
-module Controls =
-
-    [<Sealed>]
-    type EntryPoint() =
-        inherit Web.Control()
-
-        [<JavaScript>]
-        override __.Body =
-            Client.Main() :> _
-
 module Skin =
     open System.Web
 
@@ -51,7 +41,7 @@ module Site =
     let ChatPage =
         Skin.WithTemplate "ChatPage" <| fun ctx ->
             [
-                Div [Text "WebChat Page"]
+                Div [new ChatControl()]
             ]
 
     let Main =
