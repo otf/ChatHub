@@ -6,7 +6,7 @@ open IntelliFactory.WebSharper.Sitelets
 
 type Action =
     | Home
-    | About
+    | Chat
 
 module Controls =
 
@@ -41,41 +41,30 @@ module Skin =
 
 module Site =
 
-    let ( => ) text url =
-        A [HRef url] -< [Text text]
-
-    let Links (ctx: Context<Action>) =
-        UL [
-            LI ["Home" => ctx.Link Home]
-            LI ["About" => ctx.Link About]
-        ]
-
     let HomePage =
         Skin.WithTemplate "HomePage" <| fun ctx ->
             [
-                Div [Text "HOME"]
-                Div [new Controls.EntryPoint()]
-                Links ctx
+                H1 [Text "WebChat"]
+                A [HRef (ctx.Link Chat)] -< [Text "Start WebChat"]
             ]
 
-    let AboutPage =
-        Skin.WithTemplate "AboutPage" <| fun ctx ->
+    let ChatPage =
+        Skin.WithTemplate "ChatPage" <| fun ctx ->
             [
-                Div [Text "ABOUT"]
-                Links ctx
+                Div [Text "WebChat Page"]
             ]
 
     let Main =
         Sitelet.Sum [
             Sitelet.Content "/" Home HomePage
-            Sitelet.Content "/About" About AboutPage
+            Sitelet.Content "/Chat" Chat ChatPage
         ]
 
 [<Sealed>]
 type Website() =
     interface IWebsite<Action> with
         member this.Sitelet = Site.Main
-        member this.Actions = [Home; About]
+        member this.Actions = [Home; Chat]
 
 type Global() =
     inherit System.Web.HttpApplication()
