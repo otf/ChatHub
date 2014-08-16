@@ -14,14 +14,23 @@ module ChatClient =
         let msgElm = renderMessage msg
         ById("chat-box").AppendChild(msgElm.Dom) |> ignore
 
+    let appendNotification (msg : string) =
+        let msgElm = renderMessage msg
+        ById("chat-box").AppendChild(msgElm.Dom) |> ignore
+
     let sendMessage (ws:WebSocket) (msgBox : Element) =
-        ws.Send(msgBox.Value)
+        ws.Send(Speak msgBox.Value |> Json.Stringify)
         appendMessage msgBox.Value
         msgBox.Value <- ""
 
     let openChatWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
-        ws.Onmessage <- fun data -> data.Data.ToString() |> appendMessage
+        ws.Onmessage <- fun ev -> 
+            match Json.Parse(ev.Data.ToString()) |> As<ServerProtocol> with
+            | ServerProtocol.Join -> appendNotification "connect"
+            | ServerProtocol.Listen msg -> appendMessage msg
+        ws.Onclose <- fun () ->
+            appendNotification "disconnect"
         ws
        
     let renderMain =
