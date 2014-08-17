@@ -70,14 +70,14 @@ module ChatClient =
                 JQuery.Of("#history-box").Animate(New [("height", 500. :> obj)], 500) |> ignore
                 JQuery.Of("#history-box").Show() |> ignore
                 JQuery.Of("#message").Show() |> ignore
-                appendNotification "connect"
+                appendNotification "相手が見つかりました。チャットを開始します。"
                 JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
                 joinAudio |> playAudio
             | ServerProtocol.Listen msg -> appendMessage Other msg
         ws.Onclose <- fun () ->
             JavaScript.ClearInterval currentTimer
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
-            appendNotification "disconnect"
+            appendNotification "チャットが切断されました。"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
             disconnectAudio |> playAudio
         currentTimer <- JavaScript.SetInterval ping (10 * 1000)
