@@ -40,6 +40,7 @@ type WebSocketChatHandler () =
 
     override this.OnMessage (message : string) = 
         match message |> decodeClientProtocol with
+        | Ping -> ()
         | Speak msg -> this.onSpeak(msg)
 
 type ChatWebSocket() = 

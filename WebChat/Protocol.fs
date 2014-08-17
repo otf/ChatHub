@@ -4,6 +4,7 @@ module Protocol =
 
   [<JavaScript>]
   type ClientProtocol = 
+      | Ping
       | Speak of string
 
   [<JavaScript>]

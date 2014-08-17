@@ -31,6 +31,7 @@ module ChatClient =
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
 
     let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
+    let mutable currentTimer = Unchecked.defaultof<JavaScript.Handle>
 
     let sendMessage (msgBox : Element) =
         let msg = msgBox.Value.Trim()
@@ -41,6 +42,9 @@ module ChatClient =
             currentWebSocket.Send(Speak msgBox.Value |> Json.Stringify)
             appendMessage Me msgBox.Value
             msgBox.Value <- ""
+
+    let ping () = currentWebSocket.Send(Ping |> Json.Stringify)
+
 
     let openChatWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
@@ -55,9 +59,11 @@ module ChatClient =
                 JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
             | ServerProtocol.Listen msg -> appendMessage Other msg
         ws.Onclose <- fun () ->
+            JavaScript.ClearInterval currentTimer
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
             appendNotification "disconnect"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
+        currentTimer <- JavaScript.SetInterval ping (10 * 1000)
         ws
 
     let connect () =
