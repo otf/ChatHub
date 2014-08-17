@@ -48,15 +48,15 @@ module ChatClient =
     let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
     let mutable currentTimer = Unchecked.defaultof<JavaScript.Handle>
 
-    let sendMessage (msgBox : Element) =
-        let msg = msgBox.Value.Trim()
+    let sendMessage () =
+        let msg = (JQuery.Of("#message > textarea").Val() |> string).Trim()
 
         if msg = "" then 
             ()
         else
-            currentWebSocket.Send(Speak msgBox.Value |> Json.Stringify)
-            appendMessage Me msgBox.Value
-            msgBox.Value <- ""
+            currentWebSocket.Send(Speak msg |> Json.Stringify)
+            appendMessage Me msg
+            JQuery.Of("#message > textarea").Val("") |> ignore
 
     let ping () = currentWebSocket.Send(Ping |> Json.Stringify)
 
@@ -88,9 +88,25 @@ module ChatClient =
         JQuery.Of("#reconnect-button").Attr("disabled", "disabled") |> ignore
         currentWebSocket <- ws
 
+
+    [<Inline("$ev.keyCode")>]
+    let keyCode ev = Unchecked.defaultof<int>
+
+    [<Inline("$ev.preventDefault()")>]
+    let preventDefault ev = Unchecked.defaultof<Unit>
+
+    [<Inline("$ev.shiftKey")>]
+    let shiftKey ev = Unchecked.defaultof<bool>
+
+    let onKeyPressMessage ev =
+        if keyCode ev = 13 && not <| shiftKey ev then
+            sendMessage ()
+            preventDefault ev
+        true
+
     let renderMain =
         connect ()
-        let msgBox = TextArea [Attr.Disabled "disabled"] 
+        JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keypress", onKeyPressMessage)) |> ignore
         Div [Attr.Id "chat-box"] -< [
             joinAudio |> elementOf
             messageAudio |> elementOf
@@ -102,8 +118,7 @@ module ChatClient =
 //            Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]
 //            |>! OnClick (fun x ev -> connect (); appendNotification "waiting...")
             Div [Attr.Id "message"; Attr.Style "display:none"] -< [
-                msgBox
-                |>! OnKeyUp (fun input char -> if char.KeyCode = 13 then sendMessage msgBox)
+                TextArea [Attr.Disabled "disabled"] 
             ]
         ]
 
