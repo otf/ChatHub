@@ -41,7 +41,9 @@ module Site =
     let ChatPage =
         Skin.WithTemplate "ChatPage" <| fun ctx ->
             [
-                Div [new ChatControl()]
+                Div [Attributes.Class "container"] -<
+                    [H1 [Text "WebChat"]] -<
+                    [new ChatControl()]
             ]
 
     let Main =

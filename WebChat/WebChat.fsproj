@@ -120,7 +120,6 @@
     <Content Include="Web.config" />
     <Content Include="Global.asax" />
     <Content Include="Setup.fsx" />
-    <None Include="css\iconFont.min.css" />
     <None Include="packages.config" />
     <None Include="less\wizard.less" />
     <None Include="less\window.less" />
@@ -220,6 +219,9 @@
     <None Include="css\metro-bootstrap-responsive.css" />
     <None Include="css\metro-bootstrap.min.css" />
     <None Include="css\metro-bootstrap.css" />
+    <None Include="css\iconFont.min.css" />
+    <None Include="css\WebChat.css" />
+    <None Include="ring.gif" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WebSockets">

@@ -1,0 +1,32 @@
+.metro #chat-box {
+  border: 1px #ccc solid;
+  position: relative;
+  margin: 0 0 10px 0;
+  background-color: #fdfdfd !important;
+  min-height: 100px;
+  padding: 20px
+}
+
+.metro #waiting {
+  background-image: url("../img/ring.gif");
+  background-repeat: no-repeat;
+  background-position: center;
+  max-width: 1140px;
+  height: 300px
+}
+
+.metro #history-box {
+  padding: 0px 0px 20px 0px;
+}
+
+.metro #history {
+  padding: 20px 20px 20px 20px;
+}
+
+.metro #message{
+  height: 80px
+}
+.metro #message > textarea {
+  width: 100%;
+  height: 80px
+}
