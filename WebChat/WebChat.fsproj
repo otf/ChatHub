@@ -218,13 +218,13 @@
     <None Include="fonts\iconFont.json" />
     <None Include="fonts\iconFont.eot" />
     <None Include="fonts\iconFont.dev.svg" />
-    <None Include="css\metro-bootstrap-responsive.min.css" />
-    <None Include="css\metro-bootstrap-responsive.css" />
-    <None Include="css\metro-bootstrap.min.css" />
-    <None Include="css\metro-bootstrap.css" />
-    <None Include="css\iconFont.min.css" />
-    <None Include="css\WebChat.css" />
-    <None Include="ring.gif" />
+    <Content Include="css\metro-bootstrap-responsive.min.css" />
+    <Content Include="css\metro-bootstrap-responsive.css" />
+    <Content Include="css\metro-bootstrap.min.css" />
+    <Content Include="css\metro-bootstrap.css" />
+    <Content Include="css\iconFont.min.css" />
+    <Content Include="css\WebChat.css" />
+    <Content Include="img\ring.gif" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WebSockets">
