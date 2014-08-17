@@ -171,6 +171,8 @@
     <None Include="less\breadcrumbs.less" />
     <None Include="less\balloon.less" />
     <None Include="less\accordion.less" />
+    <Content Include="js\jquery\jquery.mousewheel.js" />
+    <Content Include="js\jquery\jquery.widget.min.js" />
     <Content Include="js\metro\metro-wizard.js" />
     <Content Include="js\metro\metro-treeview.js" />
     <Content Include="js\metro\metro-touch-handler.js" />
