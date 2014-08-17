@@ -15,6 +15,11 @@
   height: 300px
 }
 
+.metro #waiting > p {
+  text-align: center;
+    padding-top: 250px
+}
+
 .metro #history-box {
   margin: 0px 0px 20px 0px;
   overflow : scroll

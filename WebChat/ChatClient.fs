@@ -75,7 +75,8 @@ module ChatClient =
         connect ()
         let msgBox = TextArea [Attr.Disabled "disabled"] 
         Div [Attr.Id "chat-box"] -< [
-            Div [ Attr.Id "waiting" ]
+            Div [ Attr.Id "waiting" ] -<
+              [P [Text "相手を探しています"]]
             Div [ Attr.Id "history-box";Attr.Style "display:none"] -<
                 [ Div [ Attr.Id "history"]]
 //            Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]
