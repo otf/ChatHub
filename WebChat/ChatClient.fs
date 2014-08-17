@@ -23,17 +23,24 @@ module ChatClient =
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
         ById("history").AppendChild(msgElm.Dom) |> ignore
+        JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
 
     let appendNotification (msg : string) =
         let msgElm = renderMessage System msg
         ById("history").AppendChild(msgElm.Dom) |> ignore
+        JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
 
     let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
 
     let sendMessage (msgBox : Element) =
-        currentWebSocket.Send(Speak msgBox.Value |> Json.Stringify)
-        appendMessage Me msgBox.Value
-        msgBox.Value <- ""
+        let msg = msgBox.Value.Trim()
+
+        if msg = "" then 
+            ()
+        else
+            currentWebSocket.Send(Speak msgBox.Value |> Json.Stringify)
+            appendMessage Me msgBox.Value
+            msgBox.Value <- ""
 
     let openChatWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
@@ -64,12 +71,12 @@ module ChatClient =
         Div [Attr.Id "chat-box"] -< [
             Div [ Attr.Id "waiting" ]
             Div [ Attr.Id "history-box";Attr.Style "display:none"] -<
-                [ Div [ Attr.Id "history";  Attr.Class "scrollbox"; Attr.NewAttr "data-role" "scrollbox"; Attr.NewAttr "data-scroll" "vertical" ]]
+                [ Div [ Attr.Id "history"]]
 //            Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]
 //            |>! OnClick (fun x ev -> connect (); appendNotification "waiting...")
             Div [Attr.Id "message"; Attr.Style "display:none"] -< [
                 msgBox
-                |>! OnKeyPress (fun input char -> if char.CharacterCode = 13 then sendMessage msgBox)
+                |>! OnKeyUp (fun input char -> if char.KeyCode = 13 then sendMessage msgBox)
             ]
         ]
 
