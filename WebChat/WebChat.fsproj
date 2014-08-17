@@ -227,6 +227,9 @@
     <Content Include="css\iconFont.min.css" />
     <Content Include="css\WebChat.css" />
     <Content Include="img\ring.gif" />
+    <Content Include="audio\disconnect.mp3" />
+    <Content Include="audio\join.mp3" />
+    <Content Include="audio\message.mp3" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WebSockets">

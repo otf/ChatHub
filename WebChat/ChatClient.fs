@@ -20,10 +20,25 @@ module ChatClient =
         | Me -> [Attr.Class "balloon right"]
         | Other -> [Attr.Class "balloon left"]
 
+    let renderAudio (path : string) =
+        let se = HTML5.Tags.Audio []
+        let audio = As<HTMLAudioElement> se.Dom
+        audio.Src <- path
+        audio, se
+
+    let joinAudio = renderAudio "audio/join.mp3"
+    let messageAudio = renderAudio "audio/message.mp3"
+    let disconnectAudio = renderAudio "audio/disconnect.mp3"
+    let playAudio (audio : HTMLAudioElement, _) = audio.Play()
+    let elementOf (_, elm) = elm
+
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
         ById("history").AppendChild(msgElm.Dom) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
+
+        if orientation = Other then
+            messageAudio |> playAudio
 
     let appendNotification (msg : string) =
         let msgElm = renderMessage System msg
@@ -57,12 +72,14 @@ module ChatClient =
                 JQuery.Of("#message").Show() |> ignore
                 appendNotification "connect"
                 JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
+                joinAudio |> playAudio
             | ServerProtocol.Listen msg -> appendMessage Other msg
         ws.Onclose <- fun () ->
             JavaScript.ClearInterval currentTimer
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
             appendNotification "disconnect"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
+            disconnectAudio |> playAudio
         currentTimer <- JavaScript.SetInterval ping (10 * 1000)
         ws
 
@@ -75,6 +92,9 @@ module ChatClient =
         connect ()
         let msgBox = TextArea [Attr.Disabled "disabled"] 
         Div [Attr.Id "chat-box"] -< [
+            joinAudio |> elementOf
+            messageAudio |> elementOf
+            disconnectAudio |> elementOf
             Div [ Attr.Id "waiting" ] -<
               [P [Text "相手を探しています"]]
             Div [ Attr.Id "history-box";Attr.Style "display:none"] -<
