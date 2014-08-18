@@ -20,8 +20,8 @@ type WebSocketChatHandler () =
         | Some (KeyValue (other, _)) -> 
             handlers.[other] <- Chatting newHandler
             handlers.Add(newHandler, Chatting other)
-            other.Send(encodeServerProtocol Join)
-            newHandler.Send(encodeServerProtocol Join)
+            Join |> encodeServerProtocol |> other.Send
+            Join |> encodeServerProtocol |> newHandler.Send
         | None -> handlers.[newHandler] <- Waiting
     
     let tryRemove (removeHandler : WebSocketChatHandler) =
@@ -35,7 +35,8 @@ type WebSocketChatHandler () =
 
     let trySpeak handler msg = 
         match handlers.TryGetValue(handler) with
-        | (true, Chatting other) -> other.Send(encodeServerProtocol (Listen msg))
+        | (true, Chatting other) -> 
+            Listen msg |> encodeServerProtocol |> other.Send
         | _ -> ()
 
     override this.OnOpen () = lock handlers (fun () -> addAndTryBeginChat this)
