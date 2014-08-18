@@ -2,7 +2,7 @@ namespace WebChat
 
 open System.Web
 open Microsoft.Web.WebSockets
-open System.Collections.Concurrent
+open System.Collections.Generic
 
 open Protocol
 
@@ -13,35 +13,39 @@ type Client<'a> =
 type WebSocketChatHandler () =
     inherit WebSocketHandler ()
 
-    static let handlers = ConcurrentDictionary()
+    static let handlers = Dictionary()
 
-    override this.OnOpen () =
+    let addAndTryBeginChat (newHandler : WebSocketChatHandler) = 
         match handlers |> Seq.tryFind (fun kvp -> kvp.Value = Waiting) with
-        | Some kvp -> 
-            if handlers.TryUpdate(kvp.Key, Chatting(this), Waiting) then
-                handlers.TryAdd(this, Chatting(kvp.Key)) |> ignore
-                kvp.Key.Send(encodeServerProtocol Join)
-                this.Send(encodeServerProtocol Join)
-            else
-                handlers.TryAdd(this, Waiting) |> ignore
-        | None -> handlers.TryAdd(this, Waiting) |> ignore
-
-    override this.OnClose() =
-        match handlers.TryGetValue(this) with
-        | (true, Chatting target) -> target.Close()
+        | Some (KeyValue (other, _)) -> 
+            handlers.[other] <- Chatting newHandler
+            handlers.Add(newHandler, Chatting other)
+            other.Send(encodeServerProtocol Join)
+            newHandler.Send(encodeServerProtocol Join)
+        | None -> handlers.[newHandler] <- Waiting
+    
+    let tryRemove (removeHandler : WebSocketChatHandler) =
+        match handlers.TryGetValue(removeHandler) with
+        | (true, Chatting other) -> 
+            other.Close()
+            handlers.Remove(other) |> ignore
         | _ -> ()
 
-        handlers.TryRemove(this) |> ignore
+        handlers.Remove(removeHandler) |> ignore
 
-    member private this.onSpeak (msg) =
-        match handlers.TryGetValue(this) with
-        | (true, Chatting target) -> target.Send(encodeServerProtocol (Listen msg))
+    let trySpeak handler msg = 
+        match handlers.TryGetValue(handler) with
+        | (true, Chatting other) -> other.Send(encodeServerProtocol (Listen msg))
         | _ -> ()
+
+    override this.OnOpen () = lock handlers (fun () -> addAndTryBeginChat this)
+
+    override this.OnClose() = lock handlers (fun () -> tryRemove this)
 
     override this.OnMessage (message : string) = 
         match message |> decodeClientProtocol with
         | Ping -> ()
-        | Speak msg -> this.onSpeak(msg)
+        | Speak msg -> lock handlers (fun () -> trySpeak this msg)
 
 type ChatWebSocket() = 
     interface IHttpHandler with
