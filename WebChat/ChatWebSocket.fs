@@ -37,7 +37,8 @@ type WebSocketChatHandler () =
         match handlers.TryGetValue(handler) with
         | (true, Chatting other) -> 
             Listen msg |> encodeServerProtocol |> other.Send
-        | _ -> ()
+            true
+        | _ -> false
 
     override this.OnOpen () = lock handlers (fun () -> addAndTryBeginChat this)
 
@@ -46,7 +47,8 @@ type WebSocketChatHandler () =
     override this.OnMessage (message : string) = 
         match message |> decodeClientProtocol with
         | Ping -> ()
-        | Speak msg -> lock handlers (fun () -> trySpeak this msg)
+        | Speak msg -> 
+            lock handlers (fun () -> if trySpeak this msg then () else failwith "チャット中じゃないのに発言しようとしました。")
 
 type ChatWebSocket() = 
     interface IHttpHandler with
