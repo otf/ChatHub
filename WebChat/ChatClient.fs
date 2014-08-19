@@ -39,14 +39,10 @@ module ChatClient =
         let msgElm = renderMessage orientation msg
         JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
-
-        if orientation = Other then
-            messageAudio |> playAudio
-
-    let appendNotification (msg : string) =
-        let msgElm = renderMessage System msg
-        JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
-        JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
+    
+    let sayByOther (msg : string) =
+        appendMessage Other msg
+        messageAudio |> playAudio
 
     let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
     let mutable currentTimer = Unchecked.defaultof<JavaScript.Handle>
@@ -73,14 +69,14 @@ module ChatClient =
                 JQuery.Of("#history-box").Animate(New [("height", 500. :> obj)], 500) |> ignore
                 JQuery.Of("#history-box").Show() |> ignore
                 JQuery.Of("#message").Show() |> ignore
-                appendNotification "相手が見つかりました。チャットを開始します。"
+                appendMessage System "相手が見つかりました。チャットを開始します。"
                 JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
                 joinAudio |> playAudio
-            | ServerProtocol.Listen msg -> appendMessage Other msg
+            | ServerProtocol.Listen msg -> sayByOther msg
         ws.Onclose <- fun () ->
             JavaScript.ClearInterval currentTimer
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
-            appendNotification "チャットが切断されました。"
+            appendMessage System "チャットが切断されました。"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
             disconnectAudio |> playAudio
         currentTimer <- JavaScript.SetInterval ping (10 * 1000)
