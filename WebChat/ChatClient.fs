@@ -32,9 +32,12 @@ module ChatClient =
     let playAudio (audio : HTMLAudioElement, _) = audio.Play()
     let elementOf (_, elm) = elm
 
+    [<Inline("$dom.linkify()")>]
+    let linkify dom = Unchecked.defaultof<Dom.Element>
+
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
-        ById("history").AppendChild(msgElm.Dom) |> ignore
+        JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
 
         if orientation = Other then
@@ -42,7 +45,7 @@ module ChatClient =
 
     let appendNotification (msg : string) =
         let msgElm = renderMessage System msg
-        ById("history").AppendChild(msgElm.Dom) |> ignore
+        JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
 
     let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
