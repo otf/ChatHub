@@ -2,7 +2,6 @@ namespace WebChat
 
 open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.JQuery
-open IntelliFactory.WebSharper.Html5
 
 [<JavaScript>]
 module JavaScriptBinding =

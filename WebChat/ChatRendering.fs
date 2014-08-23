@@ -3,9 +3,6 @@ namespace WebChat
 open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.Html
 open IntelliFactory.WebSharper.Html5
-open IntelliFactory.WebSharper.JQuery
-
-open Protocol
 
 [<JavaScript>]
 module ChatRendering =
