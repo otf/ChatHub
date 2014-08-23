@@ -61,18 +61,20 @@ module ChatClient =
 
     let ping () = webSocket |> Option.iter (Ping |> send)
 
+    let join () =
+        JQuery.Of("#waiting").Hide() |> ignore
+        JQuery.Of("#history-box").Animate(New [("height", 500. :> obj)], 500) |> ignore
+        JQuery.Of("#history-box").Show() |> ignore
+        JQuery.Of("#message").Show() |> ignore
+        appendMessage System "相手が見つかりました。チャットを開始します。"
+        JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
+        ChatAudio.join |> ChatAudio.play
+
     let openWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
         ws.Onmessage <- fun ev -> 
             match Json.Parse(ev.Data.ToString()) |> As<ServerProtocol> with
-            | ServerProtocol.Join -> 
-                JQuery.Of("#waiting").Hide() |> ignore
-                JQuery.Of("#history-box").Animate(New [("height", 500. :> obj)], 500) |> ignore
-                JQuery.Of("#history-box").Show() |> ignore
-                JQuery.Of("#message").Show() |> ignore
-                appendMessage System "相手が見つかりました。チャットを開始します。"
-                JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
-                ChatAudio.join |> ChatAudio.play
+            | ServerProtocol.Join -> join ()
             | ServerProtocol.Written -> writtenByOther ()
             | ServerProtocol.Listen msg -> sayByOther msg
         ws.Onclose <- fun () ->
