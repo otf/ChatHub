@@ -25,7 +25,7 @@ module ChatClient =
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
     
 
-    let timeoutOfWriting = 3000
+    let writingTimeout = 3000
     let mutable writtenTimer = None : JavaScript.Handle option
     let writtenByOther () =
         if JQuery.Of("#written").Length = 0 then
@@ -33,7 +33,7 @@ module ChatClient =
             JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom)) |> ignore
             JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
             writtenTimer |> Option.iter JavaScript.ClearTimeout
-            writtenTimer <- Some <| JavaScript.SetTimeout (fun () -> JQuery.Of("#written").Remove() |> ignore) timeoutOfWriting
+            writtenTimer <- Some <| JavaScript.SetTimeout (fun () -> JQuery.Of("#written").Remove() |> ignore) writingTimeout
 
     let sayByOther (msg : string) =
         writtenTimer |> Option.iter JavaScript.ClearTimeout
@@ -41,8 +41,8 @@ module ChatClient =
         appendMessage Other msg
         messageAudio |> playAudio
 
-    let mutable currentWebSocket = None : WebSocket option
-    let mutable currentTimer = None : JavaScript.Handle option
+    let mutable webSocket = None : WebSocket option
+    let mutable pingTimer = None : JavaScript.Handle option
 
     let send (msg:ClientProtocol) (ws : WebSocket) = ws.Send(msg |> Json.Stringify)
 
@@ -52,13 +52,13 @@ module ChatClient =
         if msg = "" then 
             ()
         else
-            currentWebSocket |> Option.iter (Speak msg |> send)
+            webSocket |> Option.iter (Speak msg |> send)
             appendMessage Me msg
             JQuery.Of("#message > textarea").Val("") |> ignore
 
-    let ping () = currentWebSocket |> Option.iter (Ping |> send)
+    let ping () = webSocket |> Option.iter (Ping |> send)
 
-    let openChatWebSocket () =
+    let openWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
         ws.Onmessage <- fun ev -> 
             match Json.Parse(ev.Data.ToString()) |> As<ServerProtocol> with
@@ -73,18 +73,18 @@ module ChatClient =
             | ServerProtocol.Written -> writtenByOther ()
             | ServerProtocol.Listen msg -> sayByOther msg
         ws.Onclose <- fun () ->
-            currentTimer |> Option.iter JavaScript.ClearInterval
+            pingTimer |> Option.iter JavaScript.ClearInterval
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
             appendMessage System "チャットが切断されました。"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
             disconnectAudio |> playAudio
-        currentTimer <- Some <| JavaScript.SetInterval ping (10 * 1000)
+        pingTimer <- Some <| JavaScript.SetInterval ping (10 * 1000)
         ws
 
     let connect () =
-        let ws = openChatWebSocket ()
+        let ws = openWebSocket ()
         JQuery.Of("#reconnect-button").Attr("disabled", "disabled") |> ignore
-        currentWebSocket <- Some ws
+        webSocket <- Some ws
 
 
     [<Inline("$ev.keyCode")>]
@@ -102,9 +102,9 @@ module ChatClient =
     let onKeyDown ev =
         if not wasSentWrite then
             wasSentWrite <- true
-            currentWebSocket |> Option.iter (Write |> send)
+            webSocket |> Option.iter (Write |> send)
             clearWriteTimer |> Option.iter JavaScript.ClearTimeout
-            clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) timeoutOfWriting
+            clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) writingTimeout
 
         true
 
