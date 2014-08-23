@@ -35,7 +35,7 @@ module ChatClient =
     let elementOf (_, elm) = elm
 
     [<Inline("$dom.linkify()")>]
-    let linkify dom = Unchecked.defaultof<Dom.Element>
+    let linkify dom = X<Dom.Element>
 
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
@@ -91,13 +91,13 @@ module ChatClient =
 
 
     [<Inline("$ev.keyCode")>]
-    let keyCode ev = Unchecked.defaultof<int>
+    let keyCode ev = X
 
     [<Inline("$ev.preventDefault()")>]
-    let preventDefault ev = Unchecked.defaultof<Unit>
+    let preventDefault ev = X
 
     [<Inline("$ev.shiftKey")>]
-    let shiftKey ev = Unchecked.defaultof<bool>
+    let shiftKey ev = X
 
     let onKeyPressMessage ev =
         if keyCode ev = 13 && not <| shiftKey ev then
