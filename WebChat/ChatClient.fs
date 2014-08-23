@@ -33,13 +33,13 @@ module ChatClient =
     let writingTimeout = 3000
     let mutable writtenTimer = None : JavaScript.Handle option
 
-    let writtenByOther () =
+    let onWrittenByOther () =
         if JQuery.Of("#written").Length = 0 then
             renderWritten () |> appendToHistory
             writtenTimer |> Option.iter JavaScript.ClearTimeout
             writtenTimer <- Some <| JavaScript.SetTimeout (fun () -> JQuery.Of("#written").Remove() |> ignore) writingTimeout
 
-    let sayByOther (msg : string) =
+    let onListen (msg : string) =
         writtenTimer |> Option.iter JavaScript.ClearTimeout
         JQuery.Of("#written").Remove() |> ignore
         appendMessage Other msg
@@ -64,7 +64,7 @@ module ChatClient =
 
     let ping () = webSocket |> Option.iter (Ping |> send)
 
-    let join () =
+    let onJoin () =
         JQuery.Of("#waiting").Hide() |> ignore
         JQuery.Of("#history-box").Animate(New [("height", 500. :> obj)], 500) |> ignore
         JQuery.Of("#history-box").Show() |> ignore
@@ -84,9 +84,9 @@ module ChatClient =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
         ws.Onmessage <- fun ev -> 
             match Json.Parse(ev.Data.ToString()) |> As<ServerProtocol> with
-            | ServerProtocol.Join -> join ()
-            | ServerProtocol.Written -> writtenByOther ()
-            | ServerProtocol.Listen msg -> sayByOther msg
+            | ServerProtocol.Join -> onJoin ()
+            | ServerProtocol.Written -> onWrittenByOther ()
+            | ServerProtocol.Listen msg -> onListen msg
         ws.Onclose <- onClose
         pingTimer <- Some <| JavaScript.SetInterval ping (10 * 1000)
         ws
