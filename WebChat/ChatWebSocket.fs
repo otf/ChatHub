@@ -25,10 +25,14 @@ type WebSocketChatHandler () =
     
     let tryRemove (me : WebSocketChatHandler) =
         if not <| waitingList.Remove(me) then
-            let other = chats.[me]
-            chats.[me].Close()
+            match chats.TryGetValue(me) with
+            | true, other ->
+                other.Close()
+                chats.Remove(me) |> ignore
+            | _ ->
+                ()
+
             chats.Remove(me) |> ignore
-            chats.Remove(other) |> ignore
 
     let tryInputting other =
         Written |> encodeServerProtocol |> (other : WebSocketChatHandler).Send
