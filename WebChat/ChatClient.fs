@@ -97,27 +97,23 @@ module ChatClient =
 
     let mutable wasSentWrite = false
     let mutable clearWriteTimer = None : JavaScript.Handle option
-    let onKeyDown ev =
+
+    let onKeyDownMessage elm ev =
         if not wasSentWrite then
             wasSentWrite <- true
             webSocket |> Option.iter (Write |> send)
             clearWriteTimer |> Option.iter JavaScript.ClearTimeout
             clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) writingTimeout
 
-        true
-
-    let onKeyPressMessage ev =
+    let onKeyPressMessage elm ev =
         // 改行(13)とシフトキー同時押しで明示的に改行することができる
         if keyCode ev = 13 && not <| shiftKey ev then
             wasSentWrite <- false
             sendMessage ()
             preventDefault ev
-        true
 
     let renderMain =
         connect ()
-        JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keypress", onKeyPressMessage)) |> ignore
-        JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keydown", onKeyDown)) |> ignore
         Div [Attr.Id "chat-box"] -< [
             ChatAudio.elementOf ChatAudio.join
             ChatAudio.elementOf ChatAudio.message
@@ -130,6 +126,8 @@ module ChatClient =
 //            |>! OnClick (fun x ev -> connect (); appendNotification "waiting...")
             Div [Attr.Id "message"; Attr.Style "display:none"] -< [
                 TextArea [Attr.Disabled "disabled"] 
+                |>! onKeyPress onKeyPressMessage
+                |>! onKeyDown onKeyDownMessage
             ]
         ]
 
