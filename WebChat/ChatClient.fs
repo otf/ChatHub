@@ -10,12 +10,6 @@ open ChatRendering
 
 [<JavaScript>]
 module ChatClient =
-    let joinAudio = renderAudio "audio/join.mp3"
-    let messageAudio = renderAudio "audio/message.mp3"
-    let disconnectAudio = renderAudio "audio/disconnect.mp3"
-    let playAudio (audio : HTMLAudioElement, _) = audio.Play()
-    let elementOf (_, elm) = elm
-
     [<Inline("$dom.linkify()")>]
     let linkify dom = X<Dom.Element>
 
@@ -39,7 +33,7 @@ module ChatClient =
         writtenTimer |> Option.iter JavaScript.ClearTimeout
         JQuery.Of("#written").Remove() |> ignore
         appendMessage Other msg
-        messageAudio |> playAudio
+        ChatAudio.message |> ChatAudio.play
 
     let mutable webSocket = None : WebSocket option
     let mutable pingTimer = None : JavaScript.Handle option
@@ -69,7 +63,7 @@ module ChatClient =
                 JQuery.Of("#message").Show() |> ignore
                 appendMessage System "相手が見つかりました。チャットを開始します。"
                 JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
-                joinAudio |> playAudio
+                ChatAudio.join |> ChatAudio.play
             | ServerProtocol.Written -> writtenByOther ()
             | ServerProtocol.Listen msg -> sayByOther msg
         ws.Onclose <- fun () ->
@@ -77,7 +71,7 @@ module ChatClient =
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
             appendMessage System "チャットが切断されました。"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
-            disconnectAudio |> playAudio
+            ChatAudio.disconnect |> ChatAudio.play
         pingTimer <- Some <| JavaScript.SetInterval ping (10 * 1000)
         ws
 
@@ -120,9 +114,9 @@ module ChatClient =
         JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keypress", onKeyPressMessage)) |> ignore
         JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keydown", onKeyDown)) |> ignore
         Div [Attr.Id "chat-box"] -< [
-            joinAudio |> elementOf
-            messageAudio |> elementOf
-            disconnectAudio |> elementOf
+            ChatAudio.elementOf ChatAudio.join
+            ChatAudio.elementOf ChatAudio.message
+            ChatAudio.elementOf ChatAudio.disconnect
             Div [ Attr.Id "waiting" ] -<
               [P [Text "相手を探しています"]]
             Div [ Attr.Id "history-box";Attr.Style "display:none"] -<

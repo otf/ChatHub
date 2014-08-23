@@ -118,6 +118,7 @@
     <Compile Include="Protocol.fs" />
     <Compile Include="ChatWebSocket.fs" />
     <Compile Include="ChatRendering.fs" />
+    <Compile Include="ChatAudio.fs" />
     <Compile Include="ChatClient.fs" />
     <Compile Include="Main.fs" />
     <Content Include="Main.html" />
