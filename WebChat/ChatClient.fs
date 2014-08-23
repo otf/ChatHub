@@ -13,7 +13,9 @@ module ChatClient =
     type Orientation = System | Me | Other
 
     let renderMessage (orientation : Orientation) (msg : string) =
-        Div [ Div [Text msg] -< [Attr.Class "padding10"]]
+        let msgElm = Div [Text msg] -< [Attr.Class "padding10"]
+        msgElm.Html <- msgElm.Html.Replace("\n", "</br>")
+        Div [ msgElm ]
         -<
         match orientation with 
         | System -> [Attr.Class "balloon"]
