@@ -73,6 +73,13 @@ module ChatClient =
         JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
         ChatAudio.join |> ChatAudio.play
 
+    let onClose () = 
+        pingTimer |> Option.iter JavaScript.ClearInterval
+        JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
+        appendMessage System "チャットが切断されました。"
+        JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
+        ChatAudio.disconnect |> ChatAudio.play
+
     let openWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
         ws.Onmessage <- fun ev -> 
@@ -80,12 +87,7 @@ module ChatClient =
             | ServerProtocol.Join -> join ()
             | ServerProtocol.Written -> writtenByOther ()
             | ServerProtocol.Listen msg -> sayByOther msg
-        ws.Onclose <- fun () ->
-            pingTimer |> Option.iter JavaScript.ClearInterval
-            JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
-            appendMessage System "チャットが切断されました。"
-            JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
-            ChatAudio.disconnect |> ChatAudio.play
+        ws.Onclose <- onClose
         pingTimer <- Some <| JavaScript.SetInterval ping (10 * 1000)
         ws
 
