@@ -4,6 +4,7 @@ open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.Html
 open IntelliFactory.WebSharper.Html5
 open IntelliFactory.WebSharper.JQuery
+open IntelliFactory.WebSharper.EcmaScript
 
 open Protocol
 open ChatRendering
@@ -11,9 +12,19 @@ open JavaScriptBinding
 
 [<JavaScript>]
 module ChatClient =
+    let getQuoteIt link = JQuery.Get("https://quoteit.herokuapp.com/clip.json?u=" + encodeUrl link)
+
+    let appendQuoteIt (msgElm : JQuery) (body : string) = 
+        let result = ((body ? results): string []).[0]
+        let quoteIt = renderQuoteIt <| Json.Parse(RegExp("<p>(.*)</p>").Exec(result).[1]) ? html 
+        msgElm.Append(quoteIt.Dom)
+
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
-        JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
+        let msgElm = JQuery.Of(msgElm.Dom) |> linkify
+        JQuery.Of("a", msgElm).Each(fun link -> (JQuery.Of(link).Attr("href") |> getQuoteIt).Done(appendQuoteIt msgElm) |> ignore) 
+        |> ignore
+        JQuery.Of("#history").Append(msgElm) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
     
     let writingTimeout = 3000

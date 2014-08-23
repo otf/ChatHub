@@ -11,6 +11,11 @@ open Protocol
 module ChatRendering =
     type Orientation = System | Me | Other
 
+    let renderQuoteIt (body : string) =
+        let result = Div [ Attr.Class "padding10"]
+        result.Html <- body
+        result
+
     let renderMessage (orientation : Orientation) (msg : string) =
         let msgElm = Div [Text msg] -< [Attr.Class "padding10"]
         msgElm.Html <- msgElm.Html.Replace("\n", "</br>")
