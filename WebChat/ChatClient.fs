@@ -95,20 +95,18 @@ module ChatClient =
         JQuery.Of("#reconnect-button").Attr("disabled", "disabled") |> ignore
         webSocket <- Some ws
 
-    let mutable wasSentWrite = false
     let mutable clearWriteTimer = None : JavaScript.Handle option
 
     let onKeyDownMessage elm ev =
-        if not wasSentWrite then
-            wasSentWrite <- true
+        if clearWriteTimer |> Option.isNone then
             webSocket |> Option.iter (Write |> send)
-            clearWriteTimer |> Option.iter JavaScript.ClearTimeout
-            clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) writingTimeout
+            clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> clearWriteTimer <- None) writingTimeout
 
     let onKeyPressMessage elm ev =
         // 改行(13)とシフトキー同時押しで明示的に改行することができる
         if keyCode ev = 13 && not <| shiftKey ev then
-            wasSentWrite <- false
+            clearWriteTimer |> Option.iter JavaScript.ClearTimeout
+            clearWriteTimer <- None
             sendMessage ()
             preventDefault ev
 
