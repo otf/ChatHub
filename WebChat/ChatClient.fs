@@ -41,8 +41,10 @@ module ChatClient =
         appendMessage Other msg
         messageAudio |> playAudio
 
-    let mutable currentWebSocket = Unchecked.defaultof<WebSocket>
-    let mutable currentTimer = Unchecked.defaultof<JavaScript.Handle>
+    let mutable currentWebSocket = None : WebSocket option
+    let mutable currentTimer = None : JavaScript.Handle option
+
+    let send (msg:string) (ws : WebSocket) = ws.Send(msg)
 
     let sendMessage () =
         let msg = (JQuery.Of("#message > textarea").Val() |> string).Trim()
@@ -50,11 +52,11 @@ module ChatClient =
         if msg = "" then 
             ()
         else
-            currentWebSocket.Send(Speak msg |> Json.Stringify)
+            currentWebSocket |> Option.iter (Speak msg |> Json.Stringify |> send)
             appendMessage Me msg
             JQuery.Of("#message > textarea").Val("") |> ignore
 
-    let ping () = currentWebSocket.Send(Ping |> Json.Stringify)
+    let ping () = currentWebSocket |> Option.iter (Ping |> Json.Stringify |> send)
 
     let openChatWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
@@ -71,18 +73,18 @@ module ChatClient =
             | ServerProtocol.Written -> writtenByOther ()
             | ServerProtocol.Listen msg -> sayByOther msg
         ws.Onclose <- fun () ->
-            JavaScript.ClearInterval currentTimer
+            currentTimer |> Option.iter JavaScript.ClearInterval
             JQuery.Of("#message > textarea").Attr("disabled", "disabled") |> ignore
             appendMessage System "チャットが切断されました。"
             JQuery.Of("#reconnect-button").RemoveAttr("disabled") |> ignore
             disconnectAudio |> playAudio
-        currentTimer <- JavaScript.SetInterval ping (10 * 1000)
+        currentTimer <- Some <| JavaScript.SetInterval ping (10 * 1000)
         ws
 
     let connect () =
         let ws = openChatWebSocket ()
         JQuery.Of("#reconnect-button").Attr("disabled", "disabled") |> ignore
-        currentWebSocket <- ws
+        currentWebSocket <- Some ws
 
 
     [<Inline("$ev.keyCode")>]
@@ -100,7 +102,7 @@ module ChatClient =
     let onKeyDown ev =
         if not wasSentWrite then
             wasSentWrite <- true
-            currentWebSocket.Send(Write |> Json.Stringify)
+            currentWebSocket |> Option.iter (Write |> Json.Stringify |> send)
             clearWriteTimer |> Option.iter JavaScript.ClearTimeout
             clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) timeoutOfWriting
 
