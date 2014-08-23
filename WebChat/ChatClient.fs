@@ -17,7 +17,8 @@ module ChatClient =
     let appendQuoteIt (msgElm : JQuery) (body : string) = 
         let result = ((body ? results): string []).[0]
         let quoteIt = renderQuoteIt <| Json.Parse(RegExp("<p>(.*)</p>").Exec(result).[1]) ? html 
-        msgElm.Append(quoteIt.Dom)
+        msgElm.Append(quoteIt.Dom) |> ignore
+        JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
 
     let appendToHistory (elm:Element) =
         JQuery.Of("#history").Append(JQuery.Of(elm.Dom)) |> ignore
