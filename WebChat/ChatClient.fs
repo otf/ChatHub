@@ -20,8 +20,7 @@ module ChatClient =
     let mutable writtenTimer = None : JavaScript.Handle option
     let writtenByOther () =
         if JQuery.Of("#written").Length = 0 then
-            let msgElm = Div [ Div [Text "..."] -< [Attr.Class "padding10"] ] -< [Attr.Id "written"; Attr.Class "balloon left"]
-            JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom)) |> ignore
+            JQuery.Of("#history").Append(JQuery.Of(renderWritten().Dom)) |> ignore
             JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
             writtenTimer |> Option.iter JavaScript.ClearTimeout
             writtenTimer <- Some <| JavaScript.SetTimeout (fun () -> JQuery.Of("#written").Remove() |> ignore) writingTimeout
