@@ -117,6 +117,7 @@
   <ItemGroup>
     <Compile Include="Protocol.fs" />
     <Compile Include="ChatWebSocket.fs" />
+    <Compile Include="JavaScriptBinding.fs" />
     <Compile Include="ChatRendering.fs" />
     <Compile Include="ChatAudio.fs" />
     <Compile Include="ChatClient.fs" />

@@ -7,18 +7,15 @@ open IntelliFactory.WebSharper.JQuery
 
 open Protocol
 open ChatRendering
+open JavaScriptBinding
 
 [<JavaScript>]
 module ChatClient =
-    [<Inline("$dom.linkify()")>]
-    let linkify dom = X<Dom.Element>
-
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
         JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
     
-
     let writingTimeout = 3000
     let mutable writtenTimer = None : JavaScript.Handle option
     let writtenByOther () =
@@ -79,17 +76,6 @@ module ChatClient =
         let ws = openWebSocket ()
         JQuery.Of("#reconnect-button").Attr("disabled", "disabled") |> ignore
         webSocket <- Some ws
-
-
-    [<Inline("$ev.keyCode")>]
-    let keyCode ev = X
-
-    [<Inline("$ev.preventDefault()")>]
-    let preventDefault ev = X
-
-    [<Inline("$ev.shiftKey")>]
-    let shiftKey ev = X
-
 
     let mutable wasSentWrite = false
     let mutable clearWriteTimer = None : JavaScript.Handle option
