@@ -22,7 +22,7 @@ module ChatClient =
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
         let msgElm = JQuery.Of(msgElm.Dom) |> linkify
-        JQuery.Of("a", msgElm).Each(fun link -> (JQuery.Of(link).Attr("href") |> getQuoteIt).Done(appendQuoteIt msgElm) |> ignore) 
+        JQuery.Of("a", msgElm).Each(fun link -> (JQuery.Of(link : Dom.Element).Attr("href") |> getQuoteIt).Done(appendQuoteIt msgElm) |> ignore) 
         |> ignore
         JQuery.Of("#history").Append(msgElm) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
