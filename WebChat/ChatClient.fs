@@ -44,7 +44,7 @@ module ChatClient =
     let mutable currentWebSocket = None : WebSocket option
     let mutable currentTimer = None : JavaScript.Handle option
 
-    let send (msg:string) (ws : WebSocket) = ws.Send(msg)
+    let send (msg:ClientProtocol) (ws : WebSocket) = ws.Send(msg |> Json.Stringify)
 
     let sendMessage () =
         let msg = (JQuery.Of("#message > textarea").Val() |> string).Trim()
@@ -52,11 +52,11 @@ module ChatClient =
         if msg = "" then 
             ()
         else
-            currentWebSocket |> Option.iter (Speak msg |> Json.Stringify |> send)
+            currentWebSocket |> Option.iter (Speak msg |> send)
             appendMessage Me msg
             JQuery.Of("#message > textarea").Val("") |> ignore
 
-    let ping () = currentWebSocket |> Option.iter (Ping |> Json.Stringify |> send)
+    let ping () = currentWebSocket |> Option.iter (Ping |> send)
 
     let openChatWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
@@ -102,7 +102,7 @@ module ChatClient =
     let onKeyDown ev =
         if not wasSentWrite then
             wasSentWrite <- true
-            currentWebSocket |> Option.iter (Write |> Json.Stringify |> send)
+            currentWebSocket |> Option.iter (Write |> send)
             clearWriteTimer |> Option.iter JavaScript.ClearTimeout
             clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) timeoutOfWriting
 
