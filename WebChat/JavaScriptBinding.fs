@@ -15,9 +15,11 @@ module JavaScriptBinding =
     [<Inline("$ev.preventDefault()")>]
     let preventDefault (ev : Event) = X
 
+    [<Inline>]
     let onKeyDown f (elm : Element)  = 
         JQuery.Of(elm.Body).Keydown(fun _ arg -> f elm arg).Ignore
 
+    [<Inline>]
     let onKeyPress f (elm : Element)  = 
         JQuery.Of(elm.Body).Keypress(fun _ arg -> f elm arg).Ignore
 
