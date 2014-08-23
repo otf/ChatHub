@@ -34,23 +34,18 @@ type WebSocketChatHandler () =
 
         clients.Remove(me) |> ignore
 
-    let tryInputting me =
-        match clients.TryGetValue(me) with
-        | (true, Chatting other) -> 
-            Written |> encodeServerProtocol |> other.Send
-            true
-        | _ -> false
+    let tryInputting other =
+        Written |> encodeServerProtocol |> (other : WebSocketChatHandler).Send
 
-    let trySpeak me msg = 
-        match clients.TryGetValue(me) with
-        | (true, Chatting other) -> 
-            Listen msg |> encodeServerProtocol |> other.Send
-            true
-        | _ -> false
+    let trySpeak msg other = 
+        Listen msg |> encodeServerProtocol |> (other : WebSocketChatHandler).Send
 
-    let bracketChatting f =
+    let brancketOther this f =
         lock clients (fun () ->
-            if not <| f () then 
+            match clients.TryGetValue(this) with
+            | (true, Chatting other) ->
+                f other
+            | _ ->
                 failwith "チャット中じゃないのに発言しようとしました。")
 
     override this.OnOpen () = lock clients (fun () -> addAndTryBeginChat this)
@@ -61,10 +56,9 @@ type WebSocketChatHandler () =
         match message |> decodeClientProtocol with
         | Ping -> ()
         | Write -> 
-            bracketChatting <| (fun () -> tryInputting this)
+            brancketOther this <| tryInputting
         | Speak msg -> 
-            bracketChatting <| (fun () -> trySpeak this msg)
-
+            brancketOther this <| trySpeak msg
 type ChatWebSocket() = 
     interface IHttpHandler with
         member this.ProcessRequest context =
