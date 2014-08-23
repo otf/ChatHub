@@ -24,7 +24,7 @@ module ChatRendering =
         | Other -> [Attr.Class "balloon left"]
 
     let renderWritten () =
-        Div [ Div [Text "..."] -< [Attr.Class "padding10"] ] -< [Attr.Id "written"; Attr.Class "balloon left"]        
+        Div [ Div [Text "..."] -< [Attr.Class "padding10"] ] -< [Id "written"; Attr.Class "balloon left"]        
 
     let renderAudio (path : string) =
         let se = HTML5.Tags.Audio []

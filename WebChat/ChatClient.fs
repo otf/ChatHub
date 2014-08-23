@@ -114,18 +114,18 @@ module ChatClient =
 
     let renderMain =
         connect ()
-        Div [Attr.Id "chat-box"] -< [
+        Div [Id "chat-box"] -< [
             ChatAudio.elementOf ChatAudio.join
             ChatAudio.elementOf ChatAudio.message
             ChatAudio.elementOf ChatAudio.disconnect
-            Div [ Attr.Id "waiting" ] -<
+            Div [Id "waiting" ] -<
               [P [Text "相手を探しています"]]
-            Div [ Attr.Id "history-box";Attr.Style "display:none"] -<
-                [ Div [ Attr.Id "history"]]
+            Div [Id "history-box"; Attr.Style "display:none"] -<
+                [Div [Id "history"]]
 //            Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]
 //            |>! OnClick (fun x ev -> connect (); appendNotification "waiting...")
-            Div [Attr.Id "message"; Attr.Style "display:none"] -< [
-                TextArea [Attr.Disabled "disabled"] 
+            Div [Id "message"; Attr.Style "display:none"] -< [
+                TextArea [Disabled "disabled"] 
                 |>! onKeyPress onKeyPressMessage
                 |>! onKeyDown onKeyDownMessage
             ]
