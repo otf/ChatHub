@@ -6,28 +6,10 @@ open IntelliFactory.WebSharper.Html5
 open IntelliFactory.WebSharper.JQuery
 
 open Protocol
+open ChatRendering
 
 [<JavaScript>]
 module ChatClient =
-
-    type Orientation = System | Me | Other
-
-    let renderMessage (orientation : Orientation) (msg : string) =
-        let msgElm = Div [Text msg] -< [Attr.Class "padding10"]
-        msgElm.Html <- msgElm.Html.Replace("\n", "</br>")
-        Div [ msgElm ]
-        -<
-        match orientation with 
-        | System -> [Attr.Class "balloon"]
-        | Me -> [Attr.Class "balloon right"]
-        | Other -> [Attr.Class "balloon left"]
-
-    let renderAudio (path : string) =
-        let se = HTML5.Tags.Audio []
-        let audio = As<HTMLAudioElement> se.Dom
-        audio.Src <- path
-        audio, se
-
     let joinAudio = renderAudio "audio/join.mp3"
     let messageAudio = renderAudio "audio/message.mp3"
     let disconnectAudio = renderAudio "audio/disconnect.mp3"
