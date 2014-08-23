@@ -48,6 +48,11 @@ type WebSocketChatHandler () =
             true
         | _ -> false
 
+    let bracketChatting f =
+        lock clients (fun () ->
+            if not <| f () then 
+                failwith "チャット中じゃないのに発言しようとしました。")
+
     override this.OnOpen () = lock clients (fun () -> addAndTryBeginChat this)
 
     override this.OnClose() = lock clients (fun () -> tryRemove this)
@@ -56,9 +61,9 @@ type WebSocketChatHandler () =
         match message |> decodeClientProtocol with
         | Ping -> ()
         | Write -> 
-            lock clients (fun () -> if tryInputting this then () else failwith "チャット中じゃないのに発言しようとしました。")
+            bracketChatting <| (fun () -> tryInputting this)
         | Speak msg -> 
-            lock clients (fun () -> if trySpeak this msg then () else failwith "チャット中じゃないのに発言しようとしました。")
+            bracketChatting <| (fun () -> trySpeak this msg)
 
 type ChatWebSocket() = 
     interface IHttpHandler with
