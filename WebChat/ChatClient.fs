@@ -19,20 +19,23 @@ module ChatClient =
         let quoteIt = renderQuoteIt <| Json.Parse(RegExp("<p>(.*)</p>").Exec(result).[1]) ? html 
         msgElm.Append(quoteIt.Dom)
 
+    let appendToHistory (elm:Element) =
+        JQuery.Of("#history").Append(JQuery.Of(elm.Dom)) |> ignore
+        JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
+
     let appendMessage (orientation : Orientation) (msg : string) =
         let msgElm = renderMessage orientation msg
-        let msgElm = JQuery.Of(msgElm.Dom) |> linkify
-        JQuery.Of("a", msgElm).Each(fun link -> (JQuery.Of(link : Dom.Element).Attr("href") |> getQuoteIt).Done(appendQuoteIt msgElm) |> ignore) 
+        let msgElmJQuery = JQuery.Of(msgElm.Dom) |> linkify
+        JQuery.Of("a", msgElmJQuery).Each(fun link -> (JQuery.Of(link : Dom.Element).Attr("href") |> getQuoteIt).Done(appendQuoteIt msgElmJQuery) |> ignore) 
         |> ignore
-        JQuery.Of("#history").Append(msgElm) |> ignore
-        JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
+        msgElm |> appendToHistory
     
     let writingTimeout = 3000
     let mutable writtenTimer = None : JavaScript.Handle option
+
     let writtenByOther () =
         if JQuery.Of("#written").Length = 0 then
-            JQuery.Of("#history").Append(JQuery.Of(renderWritten().Dom)) |> ignore
-            JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
+            renderWritten () |> appendToHistory
             writtenTimer |> Option.iter JavaScript.ClearTimeout
             writtenTimer <- Some <| JavaScript.SetTimeout (fun () -> JQuery.Of("#written").Remove() |> ignore) writingTimeout
 
