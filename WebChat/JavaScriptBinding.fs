@@ -7,13 +7,13 @@ open IntelliFactory.WebSharper.JQuery
 [<JavaScript>]
 module JavaScriptBinding =
     [<Inline("$dom.linkify()")>]
-    let linkify dom = X<JQuery>
+    let linkify (dom : JQuery) = X<JQuery>
 
     [<Inline("$ev.keyCode")>]
-    let keyCode ev = X
+    let keyCode (ev : Event) = X
 
     [<Inline("$ev.preventDefault()")>]
-    let preventDefault ev = X
+    let preventDefault (ev : Event) = X
 
     let onKeyDown f (elm : Element)  = 
         JQuery.Of(elm.Body).Keydown(fun _ arg -> f elm arg).Ignore
@@ -22,7 +22,7 @@ module JavaScriptBinding =
         JQuery.Of(elm.Body).Keypress(fun _ arg -> f elm arg).Ignore
 
     [<Inline("$ev.shiftKey")>]
-    let shiftKey ev = X
+    let shiftKey (ev : Event) = X
 
     [<Inline("encodeURIComponent($url)")>]
-    let encodeUrl url = X
+    let encodeUrl (url : string) = X
