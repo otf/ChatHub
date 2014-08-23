@@ -5,12 +5,14 @@ module Protocol =
   [<JavaScript>]
   type ClientProtocol = 
       | Ping
+      | Write
       | Speak of string
 
   [<JavaScript>]
   type ServerProtocol = 
       | Join
       | Listen of string
+      | Written
 
   let decodeClientProtocol (json : string) =
       let jP = Core.Json.Provider.Create()

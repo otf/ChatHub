@@ -42,7 +42,20 @@ module ChatClient =
         JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom) |> linkify) |> ignore
         JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
     
+
+    let timeoutOfWriting = 3000
+    let mutable writtenTimer = None : JavaScript.Handle option
+    let writtenByOther () =
+        if JQuery.Of("#written").Length = 0 then
+            let msgElm = Div [ Div [Text "..."] -< [Attr.Class "padding10"] ] -< [Attr.Id "written"; Attr.Class "balloon left"]
+            JQuery.Of("#history").Append(JQuery.Of(msgElm.Dom)) |> ignore
+            JQuery.Of("#history-box").ScrollTop(JQuery.Of("#history").Height()) |> ignore
+            writtenTimer |> Option.iter JavaScript.ClearTimeout
+            writtenTimer <- Some <| JavaScript.SetTimeout (fun () -> JQuery.Of("#written").Remove() |> ignore) timeoutOfWriting
+
     let sayByOther (msg : string) =
+        writtenTimer |> Option.iter JavaScript.ClearTimeout
+        JQuery.Of("#written").Remove() |> ignore
         appendMessage Other msg
         messageAudio |> playAudio
 
@@ -61,7 +74,6 @@ module ChatClient =
 
     let ping () = currentWebSocket.Send(Ping |> Json.Stringify)
 
-
     let openChatWebSocket () =
         let ws = WebSocket("ws://" + Window.Self.Location.Host + "/ChatWebSocket")
         ws.Onmessage <- fun ev -> 
@@ -74,6 +86,7 @@ module ChatClient =
                 appendMessage System "相手が見つかりました。チャットを開始します。"
                 JQuery.Of("#message > textarea").RemoveAttr("disabled") |> ignore
                 joinAudio |> playAudio
+            | ServerProtocol.Written -> writtenByOther ()
             | ServerProtocol.Listen msg -> sayByOther msg
         ws.Onclose <- fun () ->
             JavaScript.ClearInterval currentTimer
@@ -99,8 +112,21 @@ module ChatClient =
     [<Inline("$ev.shiftKey")>]
     let shiftKey ev = X
 
+
+    let mutable wasSentWrite = false
+    let mutable clearWriteTimer = None : JavaScript.Handle option
+    let onKeyDown ev =
+        if not wasSentWrite then
+            wasSentWrite <- true
+            currentWebSocket.Send(Write |> Json.Stringify)
+            clearWriteTimer |> Option.iter JavaScript.ClearTimeout
+            clearWriteTimer <- Some <| JavaScript.SetTimeout (fun () -> wasSentWrite <- false) timeoutOfWriting
+
+        true
+
     let onKeyPressMessage ev =
         if keyCode ev = 13 && not <| shiftKey ev then
+            wasSentWrite <- false
             sendMessage ()
             preventDefault ev
         true
@@ -108,6 +134,7 @@ module ChatClient =
     let renderMain =
         connect ()
         JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keypress", onKeyPressMessage)) |> ignore
+        JQuery.Of(fun _ -> JQuery.Of("#message > textarea").On("keydown", onKeyDown)) |> ignore
         Div [Attr.Id "chat-box"] -< [
             joinAudio |> elementOf
             messageAudio |> elementOf

@@ -34,6 +34,13 @@ type WebSocketChatHandler () =
 
         clients.Remove(me) |> ignore
 
+    let tryInputting me =
+        match clients.TryGetValue(me) with
+        | (true, Chatting other) -> 
+            Written |> encodeServerProtocol |> other.Send
+            true
+        | _ -> false
+
     let trySpeak me msg = 
         match clients.TryGetValue(me) with
         | (true, Chatting other) -> 
@@ -48,6 +55,8 @@ type WebSocketChatHandler () =
     override this.OnMessage (message : string) = 
         match message |> decodeClientProtocol with
         | Ping -> ()
+        | Write -> 
+            lock clients (fun () -> if tryInputting this then () else failwith "チャット中じゃないのに発言しようとしました。")
         | Speak msg -> 
             lock clients (fun () -> if trySpeak this msg then () else failwith "チャット中じゃないのに発言しようとしました。")
 
