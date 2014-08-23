@@ -40,6 +40,9 @@ type WebSocketChatHandler () =
     let trySpeak msg other = 
         Listen msg |> encodeServerProtocol |> (other : WebSocketChatHandler).Send
 
+    let brancketMe this f =
+        lock clients (fun () -> f this)
+
     let brancketOther this f =
         lock clients (fun () ->
             match clients.TryGetValue(this) with
@@ -48,9 +51,9 @@ type WebSocketChatHandler () =
             | _ ->
                 failwith "チャット中じゃないのに発言しようとしました。")
 
-    override this.OnOpen () = lock clients (fun () -> addAndTryBeginChat this)
+    override this.OnOpen () = brancketMe this addAndTryBeginChat
 
-    override this.OnClose() = lock clients (fun () -> tryRemove this)
+    override this.OnClose() = brancketMe this tryRemove
 
     override this.OnMessage (message : string) = 
         match message |> decodeClientProtocol with
