@@ -56,9 +56,7 @@ module ChatClient =
     let sendMessage () =
         let msg = (JQuery.Of("#message > textarea").Val() |> string).Trim()
 
-        if msg = "" then 
-            ()
-        else
+        if msg <> "" then 
             webSocket |> Option.iter (Speak msg |> send)
             appendMessage Me msg
             JQuery.Of("#message > textarea").Val("") |> ignore
