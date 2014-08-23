@@ -13,26 +13,30 @@ type Client<'a> =
 type WebSocketChatHandler () =
     inherit WebSocketHandler ()
 
-    static let clients = Dictionary()
+    static let handlerClientMap = Dictionary()
+    static let waitingList = ResizeArray()
 
     let addAndTryBeginChat (me : WebSocketChatHandler) = 
-        match clients |> Seq.tryFind (fun (KeyValue(_, other)) -> other = Waiting) with
-        | Some (KeyValue (other, _)) -> 
-            clients.[other] <- Chatting me
-            clients.[me] <- Chatting other
+        match waitingList |> Seq.tryFind(fun _ -> true) with
+        | Some other -> 
+            handlerClientMap.[other] <- Chatting me
+            handlerClientMap.[me] <- Chatting other
             Join |> encodeServerProtocol |> other.Send
             Join |> encodeServerProtocol |> me.Send
-        | None -> 
-            clients.[me] <- Waiting
+            waitingList.Remove(other) |> ignore
+        | _ -> 
+            handlerClientMap.[me] <- Waiting
+            waitingList.Add(me)
     
     let tryRemove (me : WebSocketChatHandler) =
-        match clients.TryGetValue(me) with
+        waitingList.Remove(me) |> ignore
+        match handlerClientMap.TryGetValue(me) with
         | (true, Chatting other) -> 
             other.Close()
-            clients.Remove(other) |> ignore
+            handlerClientMap.Remove(other) |> ignore
         | _ -> ()
 
-        clients.Remove(me) |> ignore
+        handlerClientMap.Remove(me) |> ignore
 
     let tryInputting other =
         Written |> encodeServerProtocol |> (other : WebSocketChatHandler).Send
@@ -41,11 +45,11 @@ type WebSocketChatHandler () =
         Listen msg |> encodeServerProtocol |> (other : WebSocketChatHandler).Send
 
     let brancketMe this f =
-        lock clients (fun () -> f this)
+        lock handlerClientMap (fun () -> f this)
 
     let brancketOther this f =
-        lock clients (fun () ->
-            match clients.TryGetValue(this) with
+        lock handlerClientMap (fun () ->
+            match handlerClientMap.TryGetValue(this) with
             | (true, Chatting other) ->
                 f other
             | _ ->
