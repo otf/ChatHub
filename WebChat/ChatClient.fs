@@ -32,6 +32,8 @@ module ChatClient =
         ChatAudio.message |> ChatAudio.play
 
     let mutable webSocket = None : WebSocket option
+
+    // ホスティングサーバーなどは通信のないまま接続し続けると勝手に切られることがあるので定期的にPingを送るようにする
     let mutable pingTimer = None : JavaScript.Handle option
 
     let send (msg:ClientProtocol) (ws : WebSocket) = ws.Send(msg |> Json.Stringify)
@@ -88,6 +90,7 @@ module ChatClient =
         true
 
     let onKeyPressMessage ev =
+        // 改行(13)とシフトキー同時押しで明示的に改行することができる
         if keyCode ev = 13 && not <| shiftKey ev then
             wasSentWrite <- false
             sendMessage ()
