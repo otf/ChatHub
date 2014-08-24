@@ -1,4 +1,4 @@
-namespace WebChat
+namespace ChatHub
 
 open IntelliFactory.Html
 open IntelliFactory.WebSharper
@@ -34,15 +34,15 @@ module Site =
     let HomePage =
         Skin.WithTemplate "HomePage" <| fun ctx ->
             [
-                H1 [Text "WebChat"]
-                A [HRef (ctx.Link Chat)] -< [Text "Start WebChat"]
+                H1 [Text "ChatHub"]
+                A [HRef (ctx.Link Chat)] -< [Text "Start ChatHub"]
             ]
 
     let ChatPage =
         Skin.WithTemplate "ChatPage" <| fun ctx ->
             [
                 Div [Attributes.Class "container"] -<
-                    [H1 [Text "WebChat"]] -<
+                    [H1 [Text "ChatHub"]] -<
                     [new ChatControl()]
             ]
 

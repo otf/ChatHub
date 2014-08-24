@@ -1,4 +1,4 @@
-namespace WebChat
+namespace ChatHub
 
 open System.Web
 open Microsoft.Web.WebSockets

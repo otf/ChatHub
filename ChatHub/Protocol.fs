@@ -1,4 +1,4 @@
-namespace WebChat
+namespace ChatHub
 module Protocol =
   open IntelliFactory.WebSharper
 

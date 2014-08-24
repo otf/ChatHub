@@ -1,4 +1,4 @@
-namespace WebChat
+namespace ChatHub
 
 open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.Html5

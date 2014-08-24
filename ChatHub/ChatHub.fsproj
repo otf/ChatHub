@@ -34,9 +34,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Name>WebChat</Name>
-    <RootNamespace>WebChat</RootNamespace>
-    <AssemblyName>WebChat</AssemblyName>
+    <Name>ChatHub</Name>
+    <RootNamespace>ChatHub</RootNamespace>
+    <AssemblyName>ChatHub</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <WarningLevel>3</WarningLevel>
   </PropertyGroup>
@@ -230,7 +230,7 @@
     <Content Include="css\metro-bootstrap.min.css" />
     <Content Include="css\metro-bootstrap.css" />
     <Content Include="css\iconFont.min.css" />
-    <Content Include="css\WebChat.css" />
+    <Content Include="css\ChatHub.css" />
     <Content Include="img\ring.gif" />
     <Content Include="audio\disconnect.mp3" />
     <Content Include="audio\join.mp3" />

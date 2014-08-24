@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebChat", "WebChat\WebChat.fsproj", "{2781AB56-44D5-446E-87C2-19AA30226C95}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ChatHub", "ChatHub\ChatHub.fsproj", "{2781AB56-44D5-446E-87C2-19AA30226C95}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{E9974577-FA4A-4099-85D4-7461F5CDFE6E}"
 	ProjectSection(SolutionItems) = preProject
