@@ -1,10 +1,19 @@
+body {
+  background-color: #60a917 !important
+}
+
+h1 {
+  color : #fdfdfd !important
+}
+
 .metro #chat-box {
   border: 1px #ccc solid;
   position: relative;
   margin: 0 0 10px 0;
   background-color: #fdfdfd !important;
   min-height: 100px;
-  padding: 20px
+  padding: 20px;
+  color: #60a917
 }
 
 .metro #waiting {
@@ -27,6 +36,10 @@
 
 .metro #history {
   padding: 20px 20px 20px 20px;
+}
+
+.metro #history .balloon {
+  border-color: #60a917 !important
 }
 
 .metro #message{
