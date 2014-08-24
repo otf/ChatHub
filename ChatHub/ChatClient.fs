@@ -117,7 +117,7 @@ module ChatClient =
             ChatAudio.elementOf ChatAudio.message
             ChatAudio.elementOf ChatAudio.disconnect
             Div [Id "waiting" ] -<
-              [P [Text "相手を探しています"]]
+              [Div [Attr.Class "windows8"] -< [ for i in [1..5] -> Div [Id ("wBall_" + i.ToString()); Attr.Class "wBall"] -< [Div [Attr.Class "wInnerBall"]] ]]
             Div [Id "history-box"; Attr.Style "display:none"] -<
                 [Div [Id "history"]]
 //            Button [ Text "reconnect"; Attr.Id "reconnect-button"; Attr.Disabled "disabled" ]

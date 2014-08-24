@@ -231,7 +231,7 @@
     <Content Include="css\metro-bootstrap.css" />
     <Content Include="css\iconFont.min.css" />
     <Content Include="css\ChatHub.css" />
-    <Content Include="img\ring.gif" />
+    <Content Include="css\Loader.css" />
     <Content Include="audio\disconnect.mp3" />
     <Content Include="audio\join.mp3" />
     <Content Include="audio\message.mp3" />

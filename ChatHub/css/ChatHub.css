@@ -17,16 +17,8 @@ h1 {
 }
 
 .metro #waiting {
-  background-image: url("../img/ring.gif");
-  background-repeat: no-repeat;
-  background-position: center;
   max-width: 1140px;
   height: 300px
-}
-
-.metro #waiting > p {
-  text-align: center;
-  padding-top: 250px
 }
 
 .metro #history-box {
