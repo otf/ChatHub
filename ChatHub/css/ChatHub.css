@@ -36,6 +36,42 @@ h1 {
   border:none
 }
 
+.metro .balloon:before,
+.metro .balloon:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.metro .balloon:before {
+  z-index: 2;
+}
+.metro .balloon:after {
+  z-index: 1;
+}
+.metro .balloon.left:before,
+.metro .balloon.left:after {
+  top: 10px;
+  left: 100%;
+  margin-left: -1px;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 20px solid #A7DD34;
+}
+.metro .balloon.left:after {
+  margin-left: 0;
+  border-left: 21px solid #A7DD34;
+}
+.metro .balloon.right:before,
+.metro .balloon.right:after {
+  top: 10px;
+  left: -19px;
+  margin: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 20px solid #A7DD34;
+}
+
 .metro #message{
   height: 80px
 }
